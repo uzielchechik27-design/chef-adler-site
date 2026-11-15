@@ -1,0 +1,6 @@
+services:
+  - type: web
+    runtime: static
+    name: private-chef-site
+    buildCommand: "true"
+    staticPublishPath: .
