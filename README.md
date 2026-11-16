@@ -6,15 +6,20 @@
 
 ערכו את `js/config.js`:
 
-- `email`, `phone`, `whatsapp`
+- `email`, `phone`, `whatsapp` — כשאלה מלאים, טפסי יצירת הקשר והזמנת הערב שולחים אליהם הודעה מוכנה.
+- `calendarEmbedUrl` — קישור `https` ליומן הזמנות (למשל Google Calendar appointment schedule או Cal.com). אם הוא מלא, מוטמע יומן לצד טופס הבקשה.
 - נתיבי תמונות ב-`images`:
   - `hero` — צלילה / הגשה (גיבור)
   - `about-francescana` — Osteria Francescana
-  - `about-koks` — KOKS, איי פארו
+  - `about-portrait` — דיוקן במטבח
+  - `about-sea` — דיג וים
+  - `events-table` — שולחן ארוחה
   - `ing-tuna`, `ing-wagyu` — חומרי גלם
   - `gallery` — מערך קבצים לגלריה (עם תיבת תצוגה)
 
 שימו קבצים מכווצים (עד 1800px, webp או jpg) תחת `images/`.
+
+כל עוד אין תמונות, המשבצות מוצגות כמסגרות דיו ריקות בכוונה. כל עוד אין פרטי קשר, טופס «הזמנת ערב» עובד בתצוגה: מציג את נוסח ההודעה ומאפשר להעתיק אותו.
 
 ## פריסה מקומית
 

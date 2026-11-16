@@ -30,25 +30,32 @@
       <span class="nav__toggle-bars" aria-hidden="true"></span>
     </button>
     <nav class="nav__menu" id="menu" aria-label="ניווט ראשי">
+      <p class="nav__menu-kicker" aria-hidden="true">שף פרטי</p>
       <a href="#about">אודות</a>
       <a href="#menus">תפריט הארוחה</a>
       <a href="#ingredients">חומרי הגלם</a>
       <a href="#events">אירועים</a>
       <a href="#gallery">גלריה</a>
-      <a class="nav__cta" href="#contact">יצירת קשר</a>
+      <a href="#contact">יצירת קשר</a>
+      <a class="nav__cta" href="#booking">הזמנת ערב</a>
     </nav>
   </header>
 
   <main id="main">
     <section class="hero" id="top">
       <div class="hero__pattern" aria-hidden="true"></div>
+      <p class="hero__watermark" aria-hidden="true">海</p>
       <p class="v-label hero__vlabel" aria-hidden="true">海</p>
       <div class="hero__content">
         <p class="eyebrow reveal">שף פרטי</p>
         <h1 class="hero__title reveal">עומר אדלר</h1>
         <p class="hero__latin reveal">Omer Adler</p>
+        <span class="brush reveal" aria-hidden="true"></span>
         <p class="hero__lead reveal">ים, מטבח יפני וים־תיכוני.<br />ארוחות אישיות ועונתיות, בביתכם.</p>
-        <a class="btn reveal" href="#contact">יצירת קשר</a>
+        <div class="hero__actions reveal">
+          <a class="btn" href="#booking">הזמנת ערב</a>
+          <a class="btn btn--ghost" href="#contact">יצירת קשר</a>
+        </div>
       </div>
       <div class="hanko hanko--hero reveal" aria-hidden="true">OA</div>
       <a class="hero__scroll" href="#about">גלול</a>
@@ -69,13 +76,16 @@
 
         <div class="media-pair media-pair--about reveal" data-slots="about">
           <figure class="media-well">
+            <div class="media-well__ph" aria-hidden="true"><span class="media-well__mark">食</span></div>
             <img data-slot="about-francescana" alt="Osteria Francescana" hidden />
             <figcaption>Osteria Francescana</figcaption>
           </figure>
           <figure class="media-well">
+            <div class="media-well__ph" aria-hidden="true"><span class="media-well__mark">料理</span></div>
             <img data-slot="about-portrait" alt="עומר אדלר במטבח" hidden />
           </figure>
           <figure class="media-well">
+            <div class="media-well__ph" aria-hidden="true"><span class="media-well__mark">海</span></div>
             <img data-slot="about-sea" alt="דיג וים" hidden />
           </figure>
         </div>
@@ -101,7 +111,7 @@
           <p>רוב הארוחות משלבות דגים נאים, טכניקות מהמטבח היפני, ירקות עונתיים ומנות שמושפעות ממקומות שטיילתי ואכלתי בהם בעולם.</p>
           <p>המטרה שלי היא להביא אליכם הביתה את האוכל שאני אוהב להכין, באווירה אישית ולא רשמית מדי, אבל עם הקפדה על כל מנה שיוצאת.</p>
         </div>
-        <p class="section__cta reveal"><a class="btn btn--ghost" href="#contact">לשיחה על הארוחה</a></p>
+        <p class="section__cta reveal"><a class="btn btn--ghost" href="#booking">לשיחה על הארוחה</a></p>
       </div>
     </section>
 
@@ -151,9 +161,11 @@
 
         <div class="media-pair media-pair--ing reveal" data-slots="ingredients">
           <figure class="media-well">
+            <div class="media-well__ph" aria-hidden="true"><span class="media-well__mark">鮪</span></div>
             <img data-slot="ing-tuna" alt="טונה" hidden />
           </figure>
           <figure class="media-well">
+            <div class="media-well__ph" aria-hidden="true"><span class="media-well__mark">牛</span></div>
             <img data-slot="ing-wagyu" alt="וואגיו" hidden />
           </figure>
         </div>
@@ -172,9 +184,10 @@
           <p>המטרה שלי היא להביא אליכם הביתה את האוכל שאני אוהב להכין, באווירה אישית ולא רשמית מדי, אבל עם הקפדה על כל מנה שיוצאת.</p>
         </div>
         <figure class="media-well media-well--wide reveal">
+          <div class="media-well__ph" aria-hidden="true"><span class="media-well__mark">席</span></div>
           <img data-slot="events-table" alt="שולחן ארוחה" hidden />
         </figure>
-        <p class="section__cta reveal"><a class="btn" href="#contact">בדיקת זמינות</a></p>
+        <p class="section__cta reveal"><a class="btn" href="#booking">בדיקת זמינות</a></p>
       </div>
     </section>
 
@@ -186,38 +199,121 @@
           <h2>גלריה</h2>
         </header>
         <div class="gallery" id="galleryGrid" hidden></div>
-        <p class="gallery__empty" id="galleryEmpty">התמונות יופיעו כאן עם העלאת הגלריה.</p>
+        <div class="gallery-ph reveal" id="galleryEmpty">
+          <div class="gallery-ph__grid" aria-hidden="true">
+            <div class="media-well"><div class="media-well__ph"><span class="media-well__mark">一</span></div></div>
+            <div class="media-well"><div class="media-well__ph"><span class="media-well__mark">二</span></div></div>
+            <div class="media-well"><div class="media-well__ph"><span class="media-well__mark">三</span></div></div>
+          </div>
+          <p class="gallery__empty">התמונות יופיעו כאן עם העלאת הגלריה.</p>
+        </div>
       </div>
     </section>
 
-    <section class="section article section--alt" id="contact">
+    <section class="section section--alt" id="booking">
+      <div class="wrap">
+        <header class="section__head reveal">
+          <span class="v-label" aria-hidden="true">予約</span>
+          <span class="num">06</span>
+          <h2>הזמנת ערב</h2>
+        </header>
+        <p class="lead reveal">בחרו תאריך מבוקש בלוח והשאירו פרטים. הבקשה נשלחת אל עומר לבדיקת זמינות ולהתאמת הארוחה.</p>
+        <div class="notice reveal" id="bookingNotice" hidden></div>
+
+        <div class="booking reveal" id="bookingWrap">
+          <div class="booking__embed-wrap" id="bookingEmbedWrap" hidden>
+            <iframe id="bookingEmbed" title="יומן הזמנות" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+          <form class="booking__form form" id="bookingForm" novalidate>
+            <div class="cal" id="bookingCal">
+              <div class="cal__head">
+                <button type="button" class="cal__nav" id="calPrev" aria-label="החודש הקודם">
+                  <span aria-hidden="true">›</span>
+                </button>
+                <h3 class="cal__month" id="calMonth" aria-live="polite"></h3>
+                <button type="button" class="cal__nav" id="calNext" aria-label="החודש הבא">
+                  <span aria-hidden="true">‹</span>
+                </button>
+              </div>
+              <div class="cal__week" aria-hidden="true" id="calWeek"></div>
+              <div class="cal__grid" role="grid" aria-labelledby="calMonth" id="calGrid"></div>
+              <p class="cal__picked" id="calPicked">בחרו תאריך בלוח.</p>
+              <input type="hidden" name="תאריך" id="bk-date" required />
+            </div>
+
+            <div class="booking__fields">
+              <label>
+                <span>שם מלא <span class="req">*</span></span>
+                <input type="text" name="שם" id="bk-name" required autocomplete="name" />
+              </label>
+              <label>
+                <span>טלפון <span class="req">*</span></span>
+                <input type="tel" name="טלפון" id="bk-phone" required autocomplete="tel" />
+              </label>
+              <div class="form__row">
+                <label>
+                  <span>מספר סועדים</span>
+                  <input type="number" name="סועדים" id="bk-guests" min="1" inputmode="numeric" />
+                </label>
+                <label>
+                  <span>סוג הערב</span>
+                  <select name="סוג הערב" id="bk-type">
+                    <option value="">בחירת סוג ערב</option>
+                    <option value="ארוחה בבית">ארוחה בבית</option>
+                    <option value="אירוע">אירוע</option>
+                    <option value="אחר">אחר</option>
+                  </select>
+                </label>
+              </div>
+              <label>
+                <span>הערות, אלרגיות או בקשות מיוחדות</span>
+                <textarea name="הערות" id="bk-notes" rows="5"></textarea>
+              </label>
+              <button class="btn" type="submit" id="bkSubmit">שליחת הבקשה</button>
+              <p class="form__alt" id="bookingAlt"></p>
+              <p class="form__msg" id="bkMsg" role="status" aria-live="polite"></p>
+              <pre class="booking__preview" id="bkPreview" hidden></pre>
+              <button class="btn btn--ghost booking__copy" type="button" id="bkCopy" hidden>העתקת נוסח ההודעה</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="section article" id="contact">
       <div class="wrap narrow">
         <header class="section__head reveal">
           <span class="v-label" aria-hidden="true">案内</span>
-          <span class="num">06</span>
+          <span class="num">07</span>
           <h2>יצירת קשר</h2>
         </header>
         <p class="lead reveal">ספרו לי מעט על הערב שאתם מדמיינים, ואחזור אליכם לבדיקת זמינות והתאמת הארוחה.</p>
 
         <form class="form reveal" id="contactForm" novalidate>
-          <label>שם מלא <span class="req">*</span>
+          <label>
+            <span>שם מלא <span class="req">*</span></span>
             <input type="text" name="שם" id="cf-name" required autocomplete="name" />
           </label>
-          <label>טלפון <span class="req">*</span>
+          <label>
+            <span>טלפון <span class="req">*</span></span>
             <input type="tel" name="טלפון" id="cf-phone" required autocomplete="tel" />
           </label>
-          <label>אימייל
+          <label>
+            <span>אימייל</span>
             <input type="email" name="אימייל" id="cf-email" autocomplete="email" />
           </label>
           <div class="form__row">
-            <label>תאריך מבוקש
+            <label>
+              <span>תאריך מבוקש</span>
               <input type="date" name="תאריך" id="cf-date" />
             </label>
-            <label>מספר סועדים
+            <label>
+              <span>מספר סועדים</span>
               <input type="number" name="סועדים" id="cf-guests" min="1" inputmode="numeric" />
             </label>
           </div>
-          <label>הערות, אלרגיות או בקשות מיוחדות
+          <label>
+            <span>הערות, אלרגיות או בקשות מיוחדות</span>
             <textarea name="הערות" id="cf-notes" rows="5"></textarea>
           </label>
           <button class="btn" type="submit" id="cfSubmit">שליחת הבקשה</button>
@@ -227,7 +323,7 @@
       </div>
     </section>
 
-    <section class="section a11y" id="accessibility">
+    <section class="section a11y section--alt" id="accessibility">
       <div class="wrap narrow">
         <header class="section__head reveal">
           <h2>הצהרת נגישות</h2>
@@ -241,6 +337,7 @@
             <li>קישור לדילוג ישיר לתוכן הראשי</li>
             <li>מבנה כותרות היררכי ותקין</li>
             <li>תוויות ברורות לכל שדות הטופס והודעות שגיאה מפורשות</li>
+            <li>לוח השנה בבחירת תאריך ניתן לניווט במקלדת</li>
             <li>ניגודיות צבעים גבוהה בין הטקסט לרקע</li>
             <li>תמיכה בהגדלת טקסט עד 200% ללא אובדן תוכן</li>
             <li>כיבוד הגדרת מערכת ההפעלה לצמצום אנימציות</li>
@@ -267,6 +364,7 @@
         </p>
         <p class="foot__latin">Omer Adler</p>
         <p class="muted">שף פרטי · ים, מטבח יפני וים־תיכוני</p>
+        <p class="foot__cta"><a class="btn btn--light" href="#booking">הזמנת ערב</a></p>
       </div>
       <div>
         <h3>יצירת קשר</h3>
@@ -277,6 +375,7 @@
         <div class="foot__links">
           <a href="#menus">תפריט הארוחה</a>
           <a href="#events">אירועים</a>
+          <a href="#booking">הזמנת ערב</a>
           <a href="#contact">יצירת קשר</a>
           <a href="#accessibility">הצהרת נגישות</a>
         </div>
