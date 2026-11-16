@@ -6,7 +6,11 @@
     var el = document.getElementById(id);
     if (el) el.scrollIntoView();
   }
-  var shot = /(?:\?|&)shot=([a-z]+)/.exec(location.search); if (shot) document.body.classList.add("shot-" + shot[1]);
+  var shot = /(?:\?|&)shot=([a-z]+)/.exec(location.search);
+  if (shot) {
+    document.body.classList.add("shot-" + shot[1]);
+    document.querySelectorAll(".reveal").forEach(function (el) { el.classList.add("is-in"); });
+  }
   jumpHash();
   window.addEventListener("load", jumpHash);
 
@@ -14,17 +18,44 @@
   var nav = document.getElementById("nav");
   var toggle = document.getElementById("navToggle");
   var menu = document.getElementById("menu");
+  var lastFocus = null;
 
-  function closeMenu() {
-    nav.classList.remove("is-open");
-    toggle.setAttribute("aria-expanded", "false");
-  }
-  toggle.addEventListener("click", function () {
-    var open = nav.classList.toggle("is-open");
+  function setMenu(open) {
+    nav.classList.toggle("is-open", open);
+    document.documentElement.classList.toggle("nav-open", open);
     toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    menu.setAttribute("aria-hidden", open || window.matchMedia("(min-width: 901px)").matches ? "false" : "true");
+    if (open) {
+      lastFocus = document.activeElement;
+      var first = menu.querySelector("a");
+      if (first) first.focus();
+    } else if (lastFocus) {
+      lastFocus.focus();
+    }
+  }
+  function closeMenu() { setMenu(false); }
+  toggle.addEventListener("click", function () {
+    setMenu(!nav.classList.contains("is-open"));
   });
   menu.querySelectorAll("a").forEach(function (a) {
     a.addEventListener("click", closeMenu);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && nav.classList.contains("is-open")) {
+      e.preventDefault();
+      closeMenu();
+      toggle.focus();
+    }
+    if (e.key !== "Tab" || !nav.classList.contains("is-open")) return;
+    if (window.matchMedia("(min-width: 901px)").matches) return;
+    var focusable = [toggle].concat(Array.prototype.slice.call(menu.querySelectorAll("a")));
+    var i = focusable.indexOf(document.activeElement);
+    if (e.shiftKey) {
+      if (i <= 0) { e.preventDefault(); focusable[focusable.length - 1].focus(); }
+    } else if (i === focusable.length - 1) {
+      e.preventDefault();
+      focusable[0].focus();
+    }
   });
   window.addEventListener("scroll", function () {
     nav.classList.toggle("is-scrolled", window.scrollY > 20);
@@ -71,11 +102,15 @@
   fillSlot("ing-tuna", imgs["ing-tuna"], "טונה");
   fillSlot("ing-wagyu", imgs["ing-wagyu"], "וואגיו");
   if (imgs.hero) {
-    var hero = document.querySelector(".hero__sea");
+    var hero = document.querySelector(".hero");
     if (hero) {
-      hero.style.backgroundImage = "linear-gradient(180deg, rgba(7,16,23,0.25), rgba(7,16,23,0.72)), url('" + imgs.hero + "')";
-      hero.style.backgroundSize = "cover";
-      hero.style.backgroundPosition = "center";
+      var photo = document.createElement("div");
+      photo.className = "hero__photo";
+      photo.setAttribute("aria-hidden", "true");
+      photo.style.backgroundImage =
+        "linear-gradient(180deg, rgba(243,238,228,0.28), rgba(28,25,22,0.55)), url('" + imgs.hero + "')";
+      hero.insertBefore(photo, hero.firstChild);
+      hero.classList.add("has-photo");
     }
   }
 
@@ -135,6 +170,7 @@
 
   var foot = document.getElementById("footContact");
   var alt = document.getElementById("contactAlt");
+  var bookingAlt = document.getElementById("bookingAlt");
   var parts = [];
   if (SITE.phone) {
     parts.push('<a href="' + telHref(SITE.phone) + '" dir="ltr">' + SITE.phone + "</a>");
@@ -151,9 +187,11 @@
     if (SITE.whatsapp) altBits.push('או בוואטסאפ: <a href="' + waHref() + '" target="_blank" rel="noopener" dir="ltr">' + (SITE.phone || SITE.whatsapp) + "</a>");
     if (SITE.email) altBits.push('או במייל: <a href="mailto:' + SITE.email + '">' + SITE.email + "</a>");
     alt.innerHTML = altBits.join(" · ");
+    if (bookingAlt) bookingAlt.innerHTML = altBits.join(" · ");
   } else {
     foot.innerHTML = "<span class='muted'>[אימייל] · [טלפון]</span>";
     alt.textContent = "פרטי הטלפון, המייל והוואטסאפ יתווספו לכאן.";
+    if (bookingAlt) bookingAlt.textContent = "";
   }
 
   var form = document.getElementById("contactForm");
@@ -188,7 +226,266 @@
       msg.textContent = "נפתח וואטסאפ עם הפרטים.";
     } else {
       msg.className = "form__msg err";
-      msg.textContent = "פרטי הקשר של השף עדיין לא הוזנו באתר, ולכן לא ניתן לשלוח את הטופס עדיין.";
+      msg.textContent = "פרטי הקשר של השף עדיין לא הוזנו באתר, ולכן לא ניתן לשלוח את הטופס עדיין. אפשר להשתמש בטופס «הזמנת ערב» כדי לראות תצוגה של הבקשה.";
     }
   });
+
+  /* Booking calendar + form */
+  var MONTHS_HE = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
+  var WEEK_HE = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"];
+
+  function startOfDay(d) {
+    var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    return x;
+  }
+  function ymd(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function formatHe(d) {
+    return d.getDate() + " ב" + MONTHS_HE[d.getMonth()] + " " + d.getFullYear();
+  }
+  function sameDay(a, b) {
+    return a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+
+  var today = startOfDay(new Date());
+  var view = new Date(today.getFullYear(), today.getMonth(), 1);
+  var selected = null;
+  var calGrid = document.getElementById("calGrid");
+  var calWeek = document.getElementById("calWeek");
+  var calMonth = document.getElementById("calMonth");
+  var calPrev = document.getElementById("calPrev");
+  var calNext = document.getElementById("calNext");
+  var calPicked = document.getElementById("calPicked");
+  var dateInput = document.getElementById("bk-date");
+  var notice = document.getElementById("bookingNotice");
+  var bookingWrap = document.getElementById("bookingWrap");
+  var embedWrap = document.getElementById("bookingEmbedWrap");
+  var embed = document.getElementById("bookingEmbed");
+  var bookingForm = document.getElementById("bookingForm");
+  var bkMsg = document.getElementById("bkMsg");
+  var bkPreview = document.getElementById("bkPreview");
+  var bkCopy = document.getElementById("bkCopy");
+  var lastDraft = "";
+
+  var canSend = !!(SITE.whatsapp || SITE.email);
+  if (notice) {
+    if (!canSend) {
+      notice.hidden = false;
+      notice.textContent = "הטופס פעיל לתצוגה. פרטי הוואטסאפ והמייל של השף עדיין לא הוזנו באתר, ולכן הבקשה לא תישלח החוצה — לאחר השליחה יופיע נוסח ההודעה כאן, ואפשר להעתיק אותו.";
+    }
+  }
+
+  var embedUrl = (SITE.calendarEmbedUrl || "").trim();
+  if (embedUrl && /^https:\/\//i.test(embedUrl) && embed && embedWrap) {
+    embed.src = embedUrl;
+    embedWrap.hidden = false;
+    bookingWrap.classList.add("has-embed");
+  }
+
+  WEEK_HE.forEach(function (d) {
+    var el = document.createElement("div");
+    el.className = "cal__dow";
+    el.textContent = d;
+    calWeek.appendChild(el);
+  });
+
+  function renderCal(focusYmd) {
+    calMonth.textContent = MONTHS_HE[view.getMonth()] + " " + view.getFullYear();
+    var atCurrentMonth = view.getFullYear() === today.getFullYear() && view.getMonth() === today.getMonth();
+    calPrev.disabled = atCurrentMonth;
+    calGrid.innerHTML = "";
+    var firstDow = new Date(view.getFullYear(), view.getMonth(), 1).getDay();
+    var lastDate = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
+    var i;
+    for (i = 0; i < firstDow; i += 1) {
+      var pad = document.createElement("div");
+      pad.className = "cal__cell";
+      pad.setAttribute("aria-hidden", "true");
+      calGrid.appendChild(pad);
+    }
+    var focusBtn = null;
+    for (var day = 1; day <= lastDate; day += 1) {
+      var date = new Date(view.getFullYear(), view.getMonth(), day);
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "cal__day";
+      btn.textContent = String(day);
+      btn.dataset.date = ymd(date);
+      btn.setAttribute("role", "gridcell");
+      var disabled = date < today;
+      btn.disabled = disabled;
+      if (disabled) btn.setAttribute("aria-disabled", "true");
+      if (sameDay(date, today)) {
+        btn.classList.add("is-today");
+        btn.setAttribute("aria-current", "date");
+      }
+      if (selected && sameDay(date, selected)) {
+        btn.classList.add("is-selected");
+        btn.setAttribute("aria-selected", "true");
+      } else {
+        btn.setAttribute("aria-selected", "false");
+      }
+      var label = formatHe(date);
+      if (disabled) label += ", תאריך שעבר";
+      else if (sameDay(date, today)) label += ", היום";
+      if (selected && sameDay(date, selected)) label += ", נבחר";
+      btn.setAttribute("aria-label", label);
+      btn.addEventListener("click", function (ev) {
+        chooseDate(ev.currentTarget.dataset.date);
+      });
+      btn.addEventListener("keydown", onDayKey);
+      calGrid.appendChild(btn);
+      if (focusYmd && btn.dataset.date === focusYmd) focusBtn = btn;
+    }
+    while (calGrid.children.length % 7 !== 0) {
+      var trail = document.createElement("div");
+      trail.className = "cal__cell";
+      trail.setAttribute("aria-hidden", "true");
+      calGrid.appendChild(trail);
+    }
+    if (focusBtn) focusBtn.focus();
+  }
+
+  function chooseDate(iso, focus) {
+    var parts = iso.split("-");
+    selected = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    dateInput.value = iso;
+    calPicked.textContent = "התאריך שנבחר: " + formatHe(selected);
+    renderCal(focus ? iso : null);
+  }
+
+  function onDayKey(e) {
+    var iso = e.currentTarget.dataset.date;
+    var parts = iso.split("-");
+    var cur = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    var next = null;
+    if (e.key === "ArrowLeft") next = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + 1);
+    else if (e.key === "ArrowRight") next = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() - 1);
+    else if (e.key === "ArrowUp") next = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() - 7);
+    else if (e.key === "ArrowDown") next = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + 7);
+    else if (e.key === "Home") next = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() - cur.getDay());
+    else if (e.key === "End") next = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + (6 - cur.getDay()));
+    else if (e.key === "PageUp") {
+      e.preventDefault();
+      var prevMonth = new Date(view.getFullYear(), view.getMonth() - 1, 1);
+      if (prevMonth < new Date(today.getFullYear(), today.getMonth(), 1)) return;
+      view = prevMonth;
+      var probe = new Date(view.getFullYear(), view.getMonth(), Math.min(cur.getDate(), 28));
+      if (probe < today) probe = new Date(today);
+      renderCal(ymd(probe));
+      return;
+    } else if (e.key === "PageDown") {
+      e.preventDefault();
+      view = new Date(view.getFullYear(), view.getMonth() + 1, 1);
+      renderCal(ymd(new Date(view.getFullYear(), view.getMonth(), 1)));
+      return;
+    } else if (e.key === "Enter" || e.key === " ") {
+      if (!e.currentTarget.disabled) {
+        e.preventDefault();
+        chooseDate(iso, true);
+      }
+      return;
+    } else {
+      return;
+    }
+    e.preventDefault();
+    if (next < today) next = new Date(today);
+    if (next.getMonth() !== view.getMonth() || next.getFullYear() !== view.getFullYear()) {
+      view = new Date(next.getFullYear(), next.getMonth(), 1);
+    }
+    renderCal(ymd(next));
+  }
+
+  calPrev.addEventListener("click", function () {
+    var prevMonth = new Date(view.getFullYear(), view.getMonth() - 1, 1);
+    if (prevMonth < new Date(today.getFullYear(), today.getMonth(), 1)) return;
+    view = prevMonth;
+    renderCal();
+  });
+  calNext.addEventListener("click", function () {
+    view = new Date(view.getFullYear(), view.getMonth() + 1, 1);
+    renderCal();
+  });
+  renderCal();
+
+  function bookingBody() {
+    var name = document.getElementById("bk-name").value.trim();
+    var phone = document.getElementById("bk-phone").value.trim();
+    var guests = document.getElementById("bk-guests").value.trim();
+    var type = document.getElementById("bk-type").value.trim();
+    var notes = document.getElementById("bk-notes").value.trim();
+    var lines = ["בקשת הזמנת ערב מהאתר — " + name, ""];
+    if (selected) lines.push("תאריך מבוקש: " + formatHe(selected));
+    if (type) lines.push("סוג הערב: " + type);
+    if (guests) lines.push("מספר סועדים: " + guests);
+    lines.push("טלפון: " + phone);
+    if (notes) lines.push("הערות: " + notes);
+    return lines.join("\n");
+  }
+
+  bookingForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = document.getElementById("bk-name").value.trim();
+    var phone = document.getElementById("bk-phone").value.trim();
+    if (!selected || !dateInput.value) {
+      bkMsg.className = "form__msg err";
+      bkMsg.textContent = "נא לבחור תאריך בלוח.";
+      var firstDay = calGrid.querySelector(".cal__day:not(:disabled)");
+      if (firstDay) firstDay.focus();
+      return;
+    }
+    if (!name || !phone) {
+      bkMsg.className = "form__msg err";
+      bkMsg.textContent = "נא למלא שם וטלפון.";
+      (!name ? document.getElementById("bk-name") : document.getElementById("bk-phone")).focus();
+      return;
+    }
+    lastDraft = bookingBody();
+    var subject = "בקשת הזמנת ערב מהאתר — " + name;
+    if (SITE.whatsapp) {
+      window.open(waHref() + "?text=" + encodeURIComponent(lastDraft), "_blank", "noopener");
+      bkMsg.className = "form__msg ok";
+      bkMsg.textContent = "נפתח וואטסאפ עם פרטי הבקשה.";
+      bkPreview.hidden = true;
+      bkCopy.hidden = true;
+    } else if (SITE.email) {
+      window.location.href = "mailto:" + SITE.email +
+        "?subject=" + encodeURIComponent(subject) +
+        "&body=" + encodeURIComponent(lastDraft);
+      bkMsg.className = "form__msg ok";
+      bkMsg.textContent = "נפתח אצלכם חלון מייל עם הפרטים. נא ללחוץ שליחה כדי להשלים.";
+      bkPreview.hidden = true;
+      bkCopy.hidden = true;
+    } else {
+      bkPreview.textContent = lastDraft;
+      bkPreview.hidden = false;
+      bkCopy.hidden = false;
+      bkMsg.className = "form__msg ok";
+      bkMsg.textContent = "הבקשה מוכנה לתצוגה בלבד, כי פרטי הקשר של השף עדיין לא הוזנו. אפשר להעתיק את נוסח ההודעה.";
+    }
+  });
+
+  bkCopy.addEventListener("click", function () {
+    if (!lastDraft) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(lastDraft).then(function () {
+        bkMsg.className = "form__msg ok";
+        bkMsg.textContent = "נוסח ההודעה הועתק.";
+      }).catch(function () {
+        bkMsg.className = "form__msg err";
+        bkMsg.textContent = "לא ניתן היה להעתיק אוטומטית. אפשר לסמן את הטקסט ידנית.";
+      });
+    } else {
+      bkMsg.className = "form__msg err";
+      bkMsg.textContent = "לא ניתן היה להעתיק אוטומטית. אפשר לסמן את הטקסט ידנית.";
+    }
+  });
+
+  if (/(?:\?|&)openmenu=1/.test(location.search)) {
+    if (window.matchMedia("(max-width: 900px)").matches) {
+      setMenu(true);
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    }
+  }
 })();
